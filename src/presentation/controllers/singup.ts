@@ -1,10 +1,19 @@
+import { MissingParamError } from "../erros/missing-param-error";
+import { badRequest } from "../helpers/http-helper";
+import { HttpRequest, HttpResponse } from "../protocols/http";
+
 export class SingUpController {
-  handle(httpResquest: any): any {
-    if (!httpResquest.body.name) {
-      return { statusCode: 400, body: new Error("Missing param: name") };
-    }
-    if (!httpResquest.body.email) {
-      return { statusCode: 400, body: new Error("Missing param: email") };
+  handle(httpResquest: HttpRequest): HttpResponse {
+    const requiredFields = [
+      "name",
+      "email",
+      "password",
+      "passwordConfirmation",
+    ];
+    for (const field of requiredFields) {
+      if (!httpResquest.body[field]) {
+        return badRequest(new MissingParamError(field));
+      }
     }
   }
 }
