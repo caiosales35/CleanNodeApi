@@ -1,8 +1,4 @@
-import {
-  InvalidParamError,
-  MissingParamError,
-  ServerError,
-} from "../../errors";
+import { InvalidParamError, MissingParamError } from "../../errors";
 import { SingUpController } from "./singup";
 import {
   AccountModel,
@@ -153,11 +149,12 @@ describe("SignUp Controller", () => {
   });
   test("should return 500 if EmailValidator throws", async () => {
     const { sut, emailValidatorStub } = makeSut();
+    const mockedError = new Error();
 
     jest
       .spyOn(emailValidatorStub, "isValid")
       .mockImplementationOnce((email: string) => {
-        throw new Error();
+        throw mockedError;
       });
 
     const httpRequest = {
@@ -170,15 +167,15 @@ describe("SignUp Controller", () => {
     };
     const httpResponse = await sut.handle(httpRequest);
     expect(httpResponse.statusCode).toBe(500);
-    expect(httpResponse.body).toEqual(new ServerError());
   });
   test("should return 500 if AddAccount throws", async () => {
     const { sut, addAccountStub } = makeSut();
+    const mockedError = new Error();
 
     jest
       .spyOn(addAccountStub, "add")
       .mockImplementationOnce(async (account: AddAccountModel) => {
-        return new Promise((resolve, reject) => reject(new Error()));
+        return new Promise((resolve, reject) => reject(mockedError));
       });
 
     const httpRequest = {
@@ -191,7 +188,6 @@ describe("SignUp Controller", () => {
     };
     const httpResponse = await sut.handle(httpRequest);
     expect(httpResponse.statusCode).toBe(500);
-    expect(httpResponse.body).toEqual(new ServerError());
   });
   test("should call AddAccount with correct values", async () => {
     const { sut, addAccountStub } = makeSut();
