@@ -15,6 +15,12 @@ interface SutTypes {
 const hashedPassword = "hashedPassword";
 const validId = "valid";
 
+const fakeAccountData = {
+  name: "valid_name",
+  email: "valid@email.com",
+  password: "validPassword",
+};
+
 const makeAddAccountRepository = (): AddAccountRepository => {
   class AddAccountRepositoryStub implements AddAccountRepository {
     async add(accountData: AddAccountModel): Promise<AccountModel> {
@@ -66,25 +72,15 @@ describe("DbAddAccount Usecase", () => {
       .spyOn(encrypterStub, "encrypt")
       .mockReturnValue(new Promise((resolve, reject) => reject(new Error())));
 
-    const accountData = {
-      name: "valid_name",
-      email: "valid@email.com",
-      password: "validPassword",
-    };
-    const promise = sut.add(accountData);
+    const promise = sut.add(fakeAccountData);
     await expect(promise).rejects.toThrow();
   });
   test("Should call AddAccountRepository with correct values", async () => {
     const { sut, addAccountRepositoryStub } = makeSut();
     const addSpy = jest.spyOn(addAccountRepositoryStub, "add");
-    const accountData = {
-      name: "valid_name",
-      email: "valid@email.com",
-      password: "validPassword",
-    };
-    await sut.add(accountData);
+    await sut.add(fakeAccountData);
     expect(addSpy).toHaveBeenCalledWith({
-      ...accountData,
+      ...fakeAccountData,
       password: "hashedPassword",
     });
   });
@@ -93,24 +89,14 @@ describe("DbAddAccount Usecase", () => {
     jest
       .spyOn(addAccountRepositoryStub, "add")
       .mockReturnValue(new Promise((resolve, reject) => reject(new Error())));
-    const accountData = {
-      name: "valid_name",
-      email: "valid@email.com",
-      password: "validPassword",
-    };
-    const promise = sut.add(accountData);
+    const promise = sut.add(fakeAccountData);
     await expect(promise).rejects.toThrow();
   });
   test("Should return an account on success", async () => {
     const { sut } = makeSut();
-    const accountData = {
-      name: "valid_name",
-      email: "valid@email.com",
-      password: "validPassword",
-    };
-    const responseAccount = await sut.add(accountData);
+    const responseAccount = await sut.add(fakeAccountData);
     expect(responseAccount).toEqual({
-      ...accountData,
+      ...fakeAccountData,
       password: hashedPassword,
       id: validId,
     });
