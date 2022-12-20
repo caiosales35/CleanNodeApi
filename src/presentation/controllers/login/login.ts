@@ -1,34 +1,45 @@
 import { InvalidParamError, MissingParamError } from "../../errors";
-import { badRequest, ok } from "../../helpers/http-helper";
-import { Controller, HttpRequest, HttpResponse } from "../../protocols";
-import { EmailValidator } from "../singup/singup-protocols";
+import {
+  badRequest,
+  ok,
+  serverError,
+  unauthorized,
+} from "../../helpers/http-helper";
+import {
+  Authentication,
+  Controller,
+  EmailValidator,
+  HttpRequest,
+  HttpResponse,
+} from "./login-protocols";
 
 export class LoginController implements Controller {
   private readonly emailValidator: EmailValidator;
+  private readonly authentication: Authentication;
 
-  constructor(emailValidator: EmailValidator) {
+  constructor(emailValidator: EmailValidator, authentication: Authentication) {
     this.emailValidator = emailValidator;
+    this.authentication = authentication;
   }
 
   async handle(httpResquest: HttpRequest): Promise<HttpResponse> {
-    const { email, password } = httpResquest.body;
+    try {
+      const requiredFields = ["email", "password"];
+      for (const field of requiredFields) {
+        if (!httpResquest.body[field])
+          return badRequest(new MissingParamError(field));
+      }
 
-    if (!email)
-      return new Promise((resolve) =>
-        resolve(badRequest(new MissingParamError("email")))
-      );
+      const { email, password } = httpResquest.body;
+      const isValid = this.emailValidator.isValid(email);
+      if (!isValid) return badRequest(new InvalidParamError("email"));
 
-    if (!password)
-      return new Promise((resolve) =>
-        resolve(badRequest(new MissingParamError("password")))
-      );
+      const accessToken = await this.authentication.auth(email, password);
+      if (!accessToken) return unauthorized();
 
-    const isValid = this.emailValidator.isValid(email);
-    if (!isValid)
-      return new Promise((resolve) =>
-        resolve(badRequest(new InvalidParamError("email")))
-      );
-
-    return new Promise((resolve) => resolve(ok("")));
+      return new Promise((resolve) => resolve(ok({ accessToken })));
+    } catch (error) {
+      return serverError(error);
+    }
   }
 }
