@@ -3,7 +3,7 @@ import {
   ok,
   serverError,
   unauthorized,
-} from "../../helpers/http-helper";
+} from "../../helpers/http/http-helper";
 import {
   Authentication,
   Controller,
@@ -27,7 +27,7 @@ export class LoginController implements Controller {
       if (error) return badRequest(error);
 
       const { email, password } = httpResquest.body;
-      const accessToken = await this.authentication.auth(email, password);
+      const accessToken = await this.authentication.auth({ email, password });
       if (!accessToken) return unauthorized();
 
       return new Promise((resolve) => resolve(ok({ accessToken })));

@@ -4,10 +4,14 @@ import {
   ok,
   serverError,
   unauthorized,
-} from "../../helpers/http-helper";
+} from "../../helpers/http/http-helper";
 import { Validation } from "../singup/singup-protocols";
 import { LoginController } from "./login";
-import { Authentication, HttpRequest } from "./login-protocols";
+import {
+  Authentication,
+  AuthenticationModel,
+  HttpRequest,
+} from "./login-protocols";
 
 interface SutTypes {
   sut: LoginController;
@@ -43,7 +47,7 @@ const makeFakeRequest = (): HttpRequest => {
 };
 
 class AuthenticationStub implements Authentication {
-  async auth(email: string, password: string): Promise<string> {
+  async auth(authentication: AuthenticationModel): Promise<string> {
     return new Promise((resolve) => resolve(any_token));
   }
 }
@@ -59,10 +63,10 @@ describe("Login Controller", () => {
     const { sut, authenticationStub } = makeSut();
     const authSpy = jest.spyOn(authenticationStub, "auth");
     await sut.handle(httpRequest);
-    expect(authSpy).toHaveBeenCalledWith(
-      httpRequest.body.email,
-      httpRequest.body.password
-    );
+    expect(authSpy).toHaveBeenCalledWith({
+      email: httpRequest.body.email,
+      password: httpRequest.body.password,
+    });
   });
   test("Should return 401 if invalid credentials are provided", async () => {
     const { sut, authenticationStub } = makeSut();
@@ -76,7 +80,7 @@ describe("Login Controller", () => {
     const { sut, authenticationStub } = makeSut();
     jest
       .spyOn(authenticationStub, "auth")
-      .mockImplementationOnce(async (email: string, password: string) => {
+      .mockImplementationOnce(async (auth: AuthenticationModel) => {
         throw new Error();
       });
     const response = await sut.handle(httpRequest);
