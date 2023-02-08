@@ -5,16 +5,13 @@ import {
   HttpRequest,
   HttpResponse,
   Validation,
-} from "./singup-protocols";
+} from "./singup-controller-protocols";
 
 export class SingUpController implements Controller {
-  private readonly addAccount: AddAccount;
-  private readonly validation: Validation;
-
-  constructor(addAccount: AddAccount, validation: Validation) {
-    this.addAccount = addAccount;
-    this.validation = validation;
-  }
+  constructor(
+    private readonly addAccount: AddAccount,
+    private readonly validation: Validation
+  ) {}
 
   async handle(httpResquest: HttpRequest): Promise<HttpResponse> {
     try {

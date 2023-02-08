@@ -5,13 +5,13 @@ import {
   serverError,
   unauthorized,
 } from "../../helpers/http/http-helper";
-import { Validation } from "../singup/singup-protocols";
-import { LoginController } from "./login";
+import { Validation } from "../singup/singup-controller-protocols";
+import { LoginController } from "./login-controller";
 import {
   Authentication,
   AuthenticationModel,
   HttpRequest,
-} from "./login-protocols";
+} from "./login-controller-protocols";
 
 interface SutTypes {
   sut: LoginController;

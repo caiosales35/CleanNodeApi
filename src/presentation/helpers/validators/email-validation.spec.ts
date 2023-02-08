@@ -1,4 +1,4 @@
-import { EmailValidator } from "../../controllers/singup/singup-protocols";
+import { EmailValidator } from "../../controllers/singup/singup-controller-protocols";
 import { InvalidParamError } from "../../errors";
 import { EmailValidation } from "./email-validation";
 
