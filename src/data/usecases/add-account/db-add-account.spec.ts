@@ -4,22 +4,29 @@ import {
   AddAccountModel,
   AddAccountRepository,
   Hasher,
+  LoadAccountByEmailRepository,
 } from "./db-add-account-protocols";
 
 interface SutTypes {
   sut: DbAddAccount;
   hasherStub: Hasher;
   addAccountRepositoryStub: AddAccountRepository;
+  loadAccountByEmailRepository: LoadAccountByEmailRepository;
 }
 
 const hashedPassword = "hashedPassword";
 const validId = "valid";
-
 const fakeAccountData = {
   name: "valid_name",
   email: "valid@email.com",
   password: "validPassword",
 };
+
+class LoadAccountByEmailRepositoryStub implements LoadAccountByEmailRepository {
+  async loadByEmail(email: string): Promise<AccountModel> {
+    return new Promise((resolve) => resolve(null as unknown as AccountModel));
+  }
+}
 
 const makeAddAccountRepository = (): AddAccountRepository => {
   class AddAccountRepositoryStub implements AddAccountRepository {
@@ -50,8 +57,18 @@ const makeHasher = (): Hasher => {
 const makeSut = (): SutTypes => {
   const hasherStub = makeHasher();
   const addAccountRepositoryStub = makeAddAccountRepository();
-  const sut = new DbAddAccount(hasherStub, addAccountRepositoryStub);
-  return { sut, hasherStub, addAccountRepositoryStub };
+  const loadAccountByEmailRepository = new LoadAccountByEmailRepositoryStub();
+  const sut = new DbAddAccount(
+    hasherStub,
+    addAccountRepositoryStub,
+    loadAccountByEmailRepository
+  );
+  return {
+    sut,
+    hasherStub,
+    addAccountRepositoryStub,
+    loadAccountByEmailRepository,
+  };
 };
 
 describe("DbAddAccount Usecase", () => {
@@ -100,5 +117,19 @@ describe("DbAddAccount Usecase", () => {
       password: hashedPassword,
       id: validId,
     });
+  });
+  test("Should return null if loadAccountByEmailRepository not return null", async () => {
+    const { sut, loadAccountByEmailRepository } = makeSut();
+    jest
+      .spyOn(loadAccountByEmailRepository, "loadByEmail")
+      .mockResolvedValueOnce({ ...fakeAccountData, id: validId });
+    const responseAccount = await sut.add(fakeAccountData);
+    expect(responseAccount).toBeNull();
+  });
+  test("Should call LoadAccountByEmailRepository with correct email", async () => {
+    const { sut, loadAccountByEmailRepository } = makeSut();
+    const loadSpy = jest.spyOn(loadAccountByEmailRepository, "loadByEmail");
+    await sut.add(fakeAccountData);
+    expect(loadSpy).toHaveBeenLastCalledWith(fakeAccountData.email);
   });
 });
