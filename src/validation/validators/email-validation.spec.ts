@@ -1,5 +1,5 @@
-import { EmailValidator } from "../../controllers/singup/singup-controller-protocols";
-import { InvalidParamError } from "../../errors";
+import { InvalidParamError } from "../../presentation/errors";
+import { EmailValidator } from "../protocols/email-validator";
 import { EmailValidation } from "./email-validation";
 
 interface SutTypes {
