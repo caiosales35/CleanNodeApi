@@ -1,4 +1,4 @@
-import { SingUpController } from "../../../../presentation/controllers/singup/singup-controller";
+import { SingUpController } from "../../../../presentation/controllers/login/singup/singup-controller";
 import { Controller } from "../../../../presentation/protocols";
 import { makeLogControllerDecorator } from "../../decorators/log-controller-decorator-factory";
 import { makeDbAddAccount } from "../../usecases/add-account/db-add-account-factory";

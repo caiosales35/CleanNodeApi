@@ -2,13 +2,13 @@ import {
   DuplicatedEmailError,
   MissingParamError,
   ServerError,
-} from "../../errors";
+} from "../../../errors";
 import {
   badRequest,
   forbidden,
   ok,
   serverError,
-} from "../../helpers/http/http-helper";
+} from "../../../helpers/http/http-helper";
 import { SingUpController } from "./singup-controller";
 import {
   AccountModel,
